@@ -7,6 +7,7 @@ namespace tcpclient_async
 {
     internal class Program
     {
+        const int CountLoop = 5;
         const int CountRequests = 100;
 
         static void Main(string[] args)
@@ -41,7 +42,7 @@ namespace tcpclient_async
             {
                 stream.ReadTimeout = 1000;
                 stream.WriteTimeout = 1000;
-                for ( int i = 0; i < 100; i++)
+                for ( int i = 0; i < CountLoop; i++)
                 {
                     await writer.WriteLineAsync(data);
                     await writer.FlushAsync();
