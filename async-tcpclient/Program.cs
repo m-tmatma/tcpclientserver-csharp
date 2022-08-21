@@ -3,7 +3,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
 
-namespace tcpclient_async
+namespace async_tcpclient
 {
     internal class Program
     {
