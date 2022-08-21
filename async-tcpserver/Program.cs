@@ -1,4 +1,4 @@
-﻿namespace tcpserver_async
+﻿namespace async_tcpserver
 {
     internal class Program
     {
