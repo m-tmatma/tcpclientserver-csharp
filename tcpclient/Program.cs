@@ -2,6 +2,9 @@
 {
     internal class Program
     {
+        /// <summary>
+        /// https://dobon.net/vb/dotnet/internet/tcpclientserver.html
+        /// </summary>
         static void Main(string[] args)
         {
             //サーバーに送信するデータを入力してもらう
