@@ -34,9 +34,12 @@
 
             //接続要求があったら受け入れる
             System.Net.Sockets.TcpClient client = listener.AcceptTcpClient();
-            Console.WriteLine("クライアント({0}:{1})と接続しました。",
-                ((System.Net.IPEndPoint)client.Client.RemoteEndPoint).Address,
-                ((System.Net.IPEndPoint)client.Client.RemoteEndPoint).Port);
+            if (client.Client.RemoteEndPoint is not null)
+            {
+                Console.WriteLine("クライアント({0}:{1})と接続しました。",
+                    ((System.Net.IPEndPoint)client.Client.RemoteEndPoint).Address,
+                    ((System.Net.IPEndPoint)client.Client.RemoteEndPoint).Port);
+            }
 
             //NetworkStreamを取得
             System.Net.Sockets.NetworkStream ns = client.GetStream();
