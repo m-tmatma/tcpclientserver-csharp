@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿#define STREAM_READER_WRITER
+using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
 
@@ -31,6 +32,26 @@ namespace tcpclient_async
             var client = new TcpClient();
             await client.ConnectAsync(ipendpoint);
 
+#if STREAM_READER_WRITER
+            using (var stream = client.GetStream())
+            using (var reader = new StreamReader(stream))
+            using (var writer = new StreamWriter(stream))
+            {
+                stream.ReadTimeout = 1000;
+                stream.WriteTimeout = 1000;
+                for ( int i = 0; i < 100; i++)
+                {
+                    await writer.WriteLineAsync(data);
+                    await writer.FlushAsync();
+                    Console.WriteLine($"WROTE: {data}");
+                    string? res = await reader.ReadLineAsync();
+                    if (res != null)
+                    {
+                        Console.WriteLine($"READ: {res}");
+                    }
+                }
+            }
+#else
             using (var stream = client.GetStream())
             {
                 stream.ReadTimeout = 1000;
@@ -43,6 +64,7 @@ namespace tcpclient_async
                 int size = await stream.ReadAsync(receiveBytes);
                 Console.WriteLine($"READ: size = {size}");
             }
+#endif
         }
     }
 }
