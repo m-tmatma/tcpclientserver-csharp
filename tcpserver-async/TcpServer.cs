@@ -11,37 +11,52 @@ namespace tcpserver_async
 {
     internal class TcpServer
     {
+        const int MaxConnection = 18;
+
         public void Start(int port)
         {
             var endpoint = new IPEndPoint(IPAddress.Any, port);
             var server = new TcpListener(endpoint);
             server.Start();
 
-            _ = server.AcceptTcpClientAsync();
-        }
+            // https://stackoverflow.com/questions/55828932/accepttcpclientasync-lagging-on-multiply-connections
 
-        async Task AcceptTcpClientAsync(TcpListener server)
-        {
-            using (var client = await server.AcceptTcpClientAsync())
-            using (var stream = client.GetStream())
-            using (var reader = new StreamReader(stream))
-            using (var writer = new StreamWriter(stream))
+            Console.WriteLine("Start Listening");
+            var sem = new SemaphoreSlim(MaxConnection, MaxConnection);
+            while (true)
             {
-                do
-                {
-                    var message = await reader.ReadLineAsync();
-                    string currentTime = DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss");
+                sem.Wait();
 
-                    try
+                server.AcceptTcpClientAsync().ContinueWith(async task => {
+                    Console.WriteLine("Client accepted");
+
+                    var client = task.Result;
+                    using (var stream = client.GetStream())
+                    using (var reader = new StreamReader(stream))
+                    using (var writer = new StreamWriter(stream))
                     {
-                        await writer.WriteLineAsync($"[{currentTime}] {message}");
-                        await writer.FlushAsync();
+                        do
+                        {
+                            var message = await reader.ReadLineAsync();
+                            Console.WriteLine($"READ: {message}");
+
+                            try
+                            {
+                                var currentTime = DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss");
+                                var res = $"[{currentTime}] {message}";
+                                await writer.WriteLineAsync(res);
+                                await writer.FlushAsync();
+                                Console.WriteLine($"WRITE: {res}");
+                            }
+                            catch
+                            {
+                                break;
+                            }
+                        } while (client.Connected);
                     }
-                    catch
-                    {
-                        break;
-                    }
-                } while (client.Connected);
+
+                    sem.Release();
+                });
             }
         }
     }
