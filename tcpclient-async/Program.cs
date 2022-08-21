@@ -7,6 +7,8 @@ namespace tcpclient_async
 {
     internal class Program
     {
+        const int CountRequests = 100;
+
         static void Main(string[] args)
         {
             string ipString = "127.0.0.1";
@@ -16,7 +18,7 @@ namespace tcpclient_async
             var ipendpoint = new IPEndPoint(ipAddr, port);
 
             var tasks = new List<Task>();
-            for (int i = 0; i < 10; i++)
+            for (int i = 0; i < CountRequests; i++)
             {
                 string data = "test";
                 var task = SendToServer(ipendpoint, data);
