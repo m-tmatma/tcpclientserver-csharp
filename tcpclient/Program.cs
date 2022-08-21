@@ -7,14 +7,13 @@
         /// </summary>
         static void Main(string[] args)
         {
-            //サーバーに送信するデータを入力してもらう
-            Console.WriteLine("文字列を入力し、Enterキーを押してください。");
-            string? sendMsg = Console.ReadLine();
-            //何も入力されなかった時は終了
-            if (sendMsg == null || sendMsg.Length == 0)
+            var FriendlyName = System.AppDomain.CurrentDomain.FriendlyName;
+            if (args.Length == 0)
             {
+                Console.WriteLine($"{FriendlyName} message\n");
                 return;
             }
+            string sendMsg = args[0];
 
             //サーバーのIPアドレス（または、ホスト名）とポート番号
             string ipOrHost = "127.0.0.1";
