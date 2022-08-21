@@ -28,48 +28,52 @@ namespace tcpserver_async
                 sem.Wait();
 
                 server.AcceptTcpClientAsync().ContinueWith(async task => {
-
-                    var client = task.Result;
-                    if (client.Client.RemoteEndPoint is not null && client.Client.LocalEndPoint is not null)
-                    {
-                        var remoteEndPoint = (System.Net.IPEndPoint)client.Client.RemoteEndPoint;
-                        var localEndPoint = (System.Net.IPEndPoint)client.Client.LocalEndPoint;
-                        Console.WriteLine("Client accepted [{0}:{1}] => [{2}:{3}]",
-                            remoteEndPoint.Address, remoteEndPoint.Port,
-                            localEndPoint.Address, localEndPoint.Port
-                        );
-                    }
-                    else
-                    {
-                        Console.WriteLine("Client accepted");
-                    }
-
-                    using (var stream = client.GetStream())
-                    using (var reader = new StreamReader(stream))
-                    using (var writer = new StreamWriter(stream))
-                    {
-                        do
-                        {
-                            try
-                            {
-                                var message = await reader.ReadLineAsync();
-                                Console.WriteLine($"READ: {message}");
-
-                                var currentTime = DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss");
-                                var res = $"[{currentTime}] {message}";
-                                await writer.WriteLineAsync(res);
-                                await writer.FlushAsync();
-                                Console.WriteLine($"WRITE: {res}");
-                            }
-                            catch
-                            {
-                                Console.WriteLine("Client Closed.");
-                                break;
-                            }
-                        } while (client.Connected);
-                    }
+                    await OnTcpClient(task);
                     sem.Release();
                 });
+            }
+        }
+
+        private async Task OnTcpClient(Task<TcpClient> task)
+        {
+            var client = task.Result;
+            if (client.Client.RemoteEndPoint is not null && client.Client.LocalEndPoint is not null)
+            {
+                var remoteEndPoint = (System.Net.IPEndPoint)client.Client.RemoteEndPoint;
+                var localEndPoint = (System.Net.IPEndPoint)client.Client.LocalEndPoint;
+                Console.WriteLine("Client accepted [{0}:{1}] => [{2}:{3}]",
+                    remoteEndPoint.Address, remoteEndPoint.Port,
+                    localEndPoint.Address, localEndPoint.Port
+                );
+            }
+            else
+            {
+                Console.WriteLine("Client accepted");
+            }
+
+            using (var stream = client.GetStream())
+            using (var reader = new StreamReader(stream))
+            using (var writer = new StreamWriter(stream))
+            {
+                do
+                {
+                    try
+                    {
+                        var message = await reader.ReadLineAsync();
+                        Console.WriteLine($"READ: {message}");
+
+                        var currentTime = DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss");
+                        var res = $"[{currentTime}] {message}";
+                        await writer.WriteLineAsync(res);
+                        await writer.FlushAsync();
+                        Console.WriteLine($"WRITE: {res}");
+                    }
+                    catch
+                    {
+                        Console.WriteLine("Client Closed.");
+                        break;
+                    }
+                } while (client.Connected);
             }
         }
     }
