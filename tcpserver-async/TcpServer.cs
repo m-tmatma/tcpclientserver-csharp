@@ -50,11 +50,11 @@ namespace tcpserver_async
                     {
                         do
                         {
-                            var message = await reader.ReadLineAsync();
-                            Console.WriteLine($"READ: {message}");
-
                             try
                             {
+                                var message = await reader.ReadLineAsync();
+                                Console.WriteLine($"READ: {message}");
+
                                 var currentTime = DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss");
                                 var res = $"[{currentTime}] {message}";
                                 await writer.WriteLineAsync(res);
@@ -63,11 +63,11 @@ namespace tcpserver_async
                             }
                             catch
                             {
+                                Console.WriteLine("Client Closed.");
                                 break;
                             }
                         } while (client.Connected);
                     }
-
                     sem.Release();
                 });
             }
