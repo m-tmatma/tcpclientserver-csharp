@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Sockets;
@@ -28,9 +28,22 @@ namespace tcpserver_async
                 sem.Wait();
 
                 server.AcceptTcpClientAsync().ContinueWith(async task => {
-                    Console.WriteLine("Client accepted");
 
                     var client = task.Result;
+                    if (client.Client.RemoteEndPoint is not null && client.Client.LocalEndPoint is not null)
+                    {
+                        var remoteEndPoint = (System.Net.IPEndPoint)client.Client.RemoteEndPoint;
+                        var localEndPoint = (System.Net.IPEndPoint)client.Client.LocalEndPoint;
+                        Console.WriteLine("Client accepted [{0}:{1}] => [{2}:{3}]",
+                            remoteEndPoint.Address, remoteEndPoint.Port,
+                            localEndPoint.Address, localEndPoint.Port
+                        );
+                    }
+                    else
+                    {
+                        Console.WriteLine("Client accepted");
+                    }
+
                     using (var stream = client.GetStream())
                     using (var reader = new StreamReader(stream))
                     using (var writer = new StreamWriter(stream))
