@@ -77,8 +77,6 @@
             ns.Close();
             tcp.Close();
             Console.WriteLine("切断しました。");
-
-            Console.ReadLine();
         }
     }
 }
