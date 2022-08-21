@@ -19,6 +19,7 @@
             string ipOrHost = "127.0.0.1";
             //string ipOrHost = "localhost";
             int port = 2001;
+            int maxMessage = 10;
 
             //TcpClientを作成し、サーバーと接続する
             System.Net.Sockets.TcpClient tcp =
@@ -45,35 +46,44 @@
             //文字列をByte型配列に変換
             System.Text.Encoding enc = System.Text.Encoding.UTF8;
             byte[] sendBytes = enc.GetBytes(sendMsg + '\n');
-            //データを送信する
-            ns.Write(sendBytes, 0, sendBytes.Length);
-            Console.WriteLine(sendMsg);
 
-            //サーバーから送られたデータを受信する
-            System.IO.MemoryStream ms = new System.IO.MemoryStream();
-            byte[] resBytes = new byte[256];
-            int resSize = 0;
-            do
+            for( int i = 0; i < maxMessage; i++)
             {
-                //データの一部を受信する
-                resSize = ns.Read(resBytes, 0, resBytes.Length);
-                //Readが0を返した時はサーバーが切断したと判断
-                if (resSize == 0)
+                Console.Write($"Sending message {i+1}/{maxMessage}: ");
+                //データを送信する
+                ns.Write(sendBytes, 0, sendBytes.Length);
+                Console.WriteLine(sendMsg);
+
+                //サーバーから送られたデータを受信する
+                System.IO.MemoryStream ms = new System.IO.MemoryStream();
+                byte[] resBytes = new byte[256];
+                int resSize = 0;
+                do
                 {
-                    Console.WriteLine("サーバーが切断しました。");
-                    break;
-                }
-                //受信したデータを蓄積する
-                ms.Write(resBytes, 0, resSize);
-                //まだ読み取れるデータがあるか、データの最後が\nでない時は、
-                // 受信を続ける
-            } while (ns.DataAvailable || resBytes[resSize - 1] != '\n');
-            //受信したデータを文字列に変換
-            string resMsg = enc.GetString(ms.GetBuffer(), 0, (int)ms.Length);
-            ms.Close();
-            //末尾の\nを削除
-            resMsg = resMsg.TrimEnd('\n');
-            Console.WriteLine(resMsg);
+                    //データの一部を受信する
+                    resSize = ns.Read(resBytes, 0, resBytes.Length);
+                    //Readが0を返した時はサーバーが切断したと判断
+                    if (resSize == 0)
+                    {
+                        Console.WriteLine("サーバーが切断しました。");
+                        break;
+                    }
+                    //受信したデータを蓄積する
+                    ms.Write(resBytes, 0, resSize);
+                    //まだ読み取れるデータがあるか、データの最後が\nでない時は、
+                    // 受信を続ける
+                } while (ns.DataAvailable || resBytes[resSize - 1] != '\n');
+                //受信したデータを文字列に変換
+                string resMsg = enc.GetString(ms.GetBuffer(), 0, (int)ms.Length);
+                ms.Close();
+
+                //末尾の\nを削除
+                resMsg = resMsg.TrimEnd('\n');
+                Console.WriteLine(resMsg);
+
+                Console.WriteLine("waiting for sending");
+                Thread.Sleep(1000);
+            }
 
             //閉じる
             ns.Close();
