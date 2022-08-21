@@ -6,7 +6,7 @@
         {
             //サーバーに送信するデータを入力してもらう
             Console.WriteLine("文字列を入力し、Enterキーを押してください。");
-            string sendMsg = Console.ReadLine();
+            string? sendMsg = Console.ReadLine();
             //何も入力されなかった時は終了
             if (sendMsg == null || sendMsg.Length == 0)
             {
@@ -21,11 +21,14 @@
             //TcpClientを作成し、サーバーと接続する
             System.Net.Sockets.TcpClient tcp =
                 new System.Net.Sockets.TcpClient(ipOrHost, port);
-            Console.WriteLine("サーバー({0}:{1})と接続しました({2}:{3})。",
-                ((System.Net.IPEndPoint)tcp.Client.RemoteEndPoint).Address,
-                ((System.Net.IPEndPoint)tcp.Client.RemoteEndPoint).Port,
-                ((System.Net.IPEndPoint)tcp.Client.LocalEndPoint).Address,
-                ((System.Net.IPEndPoint)tcp.Client.LocalEndPoint).Port);
+            if(tcp.Client.RemoteEndPoint is not null && tcp.Client.LocalEndPoint is not null)
+            {
+                Console.WriteLine("サーバー({0}:{1})と接続しました({2}:{3})。",
+                    ((System.Net.IPEndPoint)tcp.Client.RemoteEndPoint).Address,
+                    ((System.Net.IPEndPoint)tcp.Client.RemoteEndPoint).Port,
+                    ((System.Net.IPEndPoint)tcp.Client.LocalEndPoint).Address,
+                    ((System.Net.IPEndPoint)tcp.Client.LocalEndPoint).Port);
+            }
 
             //NetworkStreamを取得する
             System.Net.Sockets.NetworkStream ns = tcp.GetStream();
